@@ -1,3 +1,6 @@
 [submodule "atf"]
 	path = atf
 	url = https://github.com/ARM-software/arm-trusted-firmware.git
+[submodule "u-boot"]
+	path = u-boot
+	url = https://github.com/u-boot/u-boot.git

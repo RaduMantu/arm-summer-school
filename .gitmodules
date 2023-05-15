@@ -13,3 +13,6 @@
 [submodule "imx-atf"]
 	path = imx-atf
 	url = https://github.com/nxp-imx/imx-atf.git
+[submodule "imx_usb_loader"]
+	path = imx_usb_loader
+	url = https://github.com/boundarydevices/imx_usb_loader.git

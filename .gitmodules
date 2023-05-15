@@ -10,3 +10,6 @@
 [submodule "linux"]
 	path = linux
 	url = https://github.com/torvalds/linux.git
+[submodule "imx-atf"]
+	path = imx-atf
+	url = https://github.com/nxp-imx/imx-atf.git

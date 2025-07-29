@@ -1,0 +1,15 @@
+[submodule "u-boot"]
+	path = u-boot
+	url = https://github.com/u-boot/u-boot.git
+[submodule "arm-trusted-firmware"]
+	path = arm-trusted-firmware
+	url = https://github.com/ARM-software/arm-trusted-firmware.git
+[submodule "buildroot"]
+	path = buildroot
+	url = https://github.com/buildroot/buildroot.git
+[submodule "linux"]
+	path = linux
+	url = https://github.com/torvalds/linux.git
+[submodule "mfgtools"]
+	path = mfgtools
+	url = https://github.com/nxp-imx/mfgtools.git

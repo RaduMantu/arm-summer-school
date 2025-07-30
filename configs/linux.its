@@ -1,0 +1,47 @@
+/dts-v1/;
+
+/ {
+    description = "ASS - Linux FIT image for FRDM i.MX 93";
+    #address-cells = <1>;
+
+    images {
+        kernel {
+            description = "Linux kernel";
+            data = /incbin/("../linux/arch/arm64/boot/Image");
+            type = "kernel";
+            arch = "arm64";
+            os = "linux";
+            compression = "none";
+            load = <0xc0000000>;
+            entry = <0xc0000000>;
+        };
+        fdt {
+            description = "Device tree";
+            data = /incbin/("../linux/arch/arm64/boot/dts/freescale/imx93-11x11-evk.dtb");
+            type = "flat_dt";
+            arch = "arm64";
+            compression = "none";
+            load = <0xc7000000>;
+        };
+        initrd {
+            description = "Ramdisk";
+            data = /incbin/("../buildroot/output/images/rootfs.cpio");
+            type = "ramdisk";
+            arch = "arm64";
+            os = "linux";
+            compression = "none";
+            load = <0xc8000000>;
+        };
+    };
+
+    configurations {
+        default = "normal-boot";
+
+        normal-boot {
+            description = "Normal boot config";
+            kernel = "kernel";
+            fdt = "fdt";
+            ramdisk = "initrd";
+        };
+    };
+};

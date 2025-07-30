@@ -1,17 +1,20 @@
 # important directories
-ATF_DIR   := arm-trusted-firmware
-UBOOT_DIR := u-boot
-MFG_DIR   := mfgtools
-BR_DIR    := buildroot
-FW_DIR    := firmware
-CONF_DIR  := configs
-OUT_DIR   := out
+ATF_DIR     := arm-trusted-firmware
+UBOOT_DIR   := u-boot
+FW_DIR      := firmware
+MFG_DIR     := mfgtools
+BR_DIR      := buildroot
+LINUX_DIR   := linux
+CONF_DIR    := configs
+OUT_DIR     := out
+OVERLAY_DIR := rootfs-overlay
 
 # compiling settings
 CMAKE := cmake
 
 # default target
 build: $(OUT_DIR)/flash.bin \
+       $(OUT_DIR)/linux.itb \
        $(MFG_DIR)/build/uuu/uuu
 
 # Firmware Image Package (FIP) binary
@@ -23,16 +26,16 @@ $(OUT_DIR)/flash.bin: $(UBOOT_DIR)/flash.bin | $(OUT_DIR)/
 	@mkdir -p $@
 
 # full cleanup (except uuu)
-clean: clean-uboot clean-atf
+clean: clean-uboot clean-atf clean-linux clean-br
 	@rm -rf $(OUT_DIR)
 
 ################################################################################
 # BL2, BL31
 ################################################################################
 
-LPDDR_BINS=$(wildcard $(FW_DIR)/firmware-imx-8.21/firmware/ddr/synopsys/lpddr*)
+LPDDR_BINS = $(wildcard $(FW_DIR)/firmware-imx-8.21/firmware/ddr/synopsys/lpddr*)
 
-$(UBOOT_DIR)/flash.bin: $(UBOOT_DIR)/.config  \
+$(UBOOT_DIR)/flash.bin: $(UBOOT_DIR)/.config \
                         $(UBOOT_DIR)/bl31.bin \
                         $(UBOOT_DIR)/mx93a1-ahab-container.img \
                         $(addprefix $(UBOOT_DIR)/,$(notdir $(LPDDR_BINS)))
@@ -84,10 +87,66 @@ clean-uuu:
 	@rm -rf $(MFG_DIR)/build
 
 ################################################################################
+# Mkimage
+################################################################################
+
+KERN_DTB = $(LINUX_DIR)/arch/arm64/boot/dts/freescale/imx93-11x11-evk.dtb
+KERN_IMG = $(LINUX_DIR)/arch/arm64/boot/Image
+BR_CPIO  = $(BR_DIR)/output/images/rootfs.cpio
+
+# generates the micro image tree
+$(OUT_DIR)/linux.itb: $(KERN_IMG) $(KERN_DTB) $(BR_CPIO) | $(OUT_DIR)/
+	mkimage -f $(CONF_DIR)/linux.its $@
+
+################################################################################
+# Linux
+################################################################################
+
+# needed by mkimage
+$(KERN_IMG): $(LINUX_DIR)/.config
+	$(MAKE) -C $(LINUX_DIR) CROSS_COMPILE=aarch64-linux-gnu- ARCH=arm64 Image
+
+# needed by mkimage
+$(KERN_DTB): $(LINUX_DIR)/.config
+	$(MAKE) -C $(LINUX_DIR) CROSS_COMPILE=aarch64-linux-gnu- ARCH=arm64 freescale/imx93-11x11-evk.dtb
+
+$(LINUX_DIR)/.config:
+	$(MAKE) -C $(LINUX_DIR) CROSS_COMPILE=aarch64-linux-gnu- ARCH=arm64 defconfig
+
+clean-linux:
+	$(MAKE) -C $(LINUX_DIR) distclean
+	@rm -f $(KERN_IMG)
+
+################################################################################
+# Buildroot
+################################################################################
+
+# needed by mkimage
+$(BR_DIR)/output/images/rootfs.cpio: $(OVERLAY_DIR) $(BR_DIR)/.config
+	$(MAKE) -C $(BR_DIR)
+
+# KERN_IMG implies that modules have been compiled
+$(OVERLAY_DIR): $(KERN_IMG) | $(OVERLAY_DIR)/
+	$(MAKE) -C $(LINUX_DIR) CROSS_COMPILE=aarch64-linux-gnu- ARCH=arm64 modules
+	INSTALL_MOD_PATH=../$(OVERLAY_DIR)/usr $(MAKE) -C $(LINUX_DIR) modules_install
+
+$(BR_DIR)/.config: $(BR_DIR)/configs/ass_defconfig
+	$(MAKE) -C $(BR_DIR) ass_defconfig
+
+$(BR_DIR)/configs/ass_defconfig: $(CONF_DIR)/buildroot.cfg
+	@cp $< $@
+
+clean-br:
+	$(MAKE) -C $(BR_DIR) distclean
+	@rm -f $(BR_DIR)/configs/ass_defconfig
+	@rm -rf $(OVERLAY_DIR)
+
+################################################################################
 # Meta Targets
 ################################################################################
 
 .SECONDARY:
 
-.PHONY: build clean clean-uboot clean-atf clean-uuu
+.PHONY: build clean clean-uboot clean-atf clean-uuu clean-linux clean-br \
+        modules-linux
 

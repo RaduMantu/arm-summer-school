@@ -4,7 +4,9 @@ Code repository for the ARM Summer School. Contains the complete setup for
 building the Firmware Image Package (FIP) for the
 [FRDM i.MX 93 Development Board][board], as well as a working Linux distribution
 and a custom kernel, paired with OP-TEE as a trusted OS. You can find the
-board's user manual [here][manual] but you'll need an NXP account.
+board's user manual [here][user-manual] but you'll need an NXP account. Also
+check out the i.MX 93 Application Processor Reference Manual [here][ref-manual]
+for identifying the memory map.
 
 Lectures and laboratories can be found on our [open courseware][ocw].
 
@@ -64,5 +66,6 @@ $ sudo ./mfgtools/build/uuu/uuu -v -b spl out/flash.bin
 ```
 
 [board]: https://www.nxp.com/design/design-center/development-boards-and-designs/frdm-i-mx-93-development-board:FRDM-IMX93
-[manual]: https://www.nxp.com/webapp/Download?colCode=UM12181&isHTMLorPDF=HTML
+[user-manual]: https://www.nxp.com/webapp/Download?colCode=UM12181&isHTMLorPDF=HTML
+[ref-manual]: https://www.nxp.com/webapp/Download?colCode=IMX93RM
 [ocw]: https://ocw.cs.pub.ro/courses/ass

@@ -10,6 +10,9 @@
 [submodule "mfgtools"]
 	path = mfgtools
 	url = https://github.com/nxp-imx/mfgtools.git
+[submodule "optee-os"]
+	path = optee-os
+	url = https://github.com/OP-TEE/optee_os.git
 [submodule "u-boot"]
 	path = u-boot
 	url = https://github.com/u-boot/u-boot.git

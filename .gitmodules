@@ -15,4 +15,5 @@
 	url = https://github.com/OP-TEE/optee_os.git
 [submodule "u-boot"]
 	path = u-boot
-	url = https://github.com/u-boot/u-boot.git
+	url = https://github.com/nxp-imx/uboot-imx.git
+	branch = lf_v2024.04

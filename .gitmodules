@@ -17,3 +17,6 @@
 	path = u-boot
 	url = https://github.com/nxp-imx/uboot-imx.git
 	branch = lf_v2024.04
+[submodule "imx-mkimage"]
+	path = imx-mkimage
+	url = https://github.com/nxp-imx/imx-mkimage.git

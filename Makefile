@@ -208,11 +208,11 @@ clean-linux:
 ################################################################################
 
 # needed by mkimage
-$(BR_DIR)/output/images/rootfs.cpio: $(OVERLAY_DIR) $(BR_DIR)/.config
+$(BR_DIR)/output/images/rootfs.cpio: $(OVERLAY_DIR)/usr $(BR_DIR)/.config
 	$(MAKE) -C $(BR_DIR)
 
 # KERN_IMG implies that modules have been compiled
-$(OVERLAY_DIR): $(KERN_IMG) | $(OVERLAY_DIR)/
+$(OVERLAY_DIR)/usr: $(KERN_IMG)
 	$(MAKE) -C $(LINUX_DIR) CROSS_COMPILE=aarch64-linux-gnu- ARCH=arm64 modules
 	INSTALL_MOD_PATH=../$(OVERLAY_DIR)/usr $(MAKE) -C $(LINUX_DIR) modules_install
 
@@ -225,7 +225,7 @@ $(BR_DIR)/configs/ass_defconfig: $(CONF_DIR)/buildroot.cfg
 clean-br:
 	$(MAKE) -C $(BR_DIR) distclean
 	@rm -f $(BR_DIR)/configs/ass_defconfig
-	@rm -rf $(OVERLAY_DIR)
+	@rm -rf $(OVERLAY_DIR)/usr
 
 ################################################################################
 # Meta Targets

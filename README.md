@@ -52,6 +52,14 @@ $ ./firmware-sentinel-0.11.bin --auto-accept
 $ popd
 ```
 
+Patch NXP's U-Boot fork with the mainline patch that adds the USB driver.
+
+```bash
+$ pushd u-boot
+$ patch -p1 <../patches/0002-imx-imx93_frdm-Add-basic-board-support.patch
+$ popd
+```
+
 ## Build and run
 
 Make sure that the switches are set in the `0001` position (inverted order on

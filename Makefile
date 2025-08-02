@@ -28,7 +28,8 @@ build: $(OUT_DIR)/flash.bin \
 	@mkdir -p $@
 
 # full cleanup (except uuu)
-clean: clean-uboot clean-atf clean-optee clean-linux clean-br clean-mkimage
+clean: clean-uboot clean-atf clean-optee clean-linux \
+       clean-br clean-mkimage clean-firmware
 	@rm -rf $(OUT_DIR)
 
 ################################################################################
@@ -42,6 +43,10 @@ $(MKIMG_DIR)/iMX93/%: $(FW_DIR)/firmware-imx-8.21/firmware/ddr/synopsys/%
 
 $(MKIMG_DIR)/iMX93/%: $(FW_DIR)/firmware-sentinel-0.11/%
 	@cp $< $@
+
+clean-firmware:
+	@rm -f $(MKIMG_DIR)/iMX93/lpddr* \
+	       $(MKIMG_DIR)/iMX93/mx93a1-ahab-container.img
 
 ################################################################################
 # Mkimage
@@ -108,9 +113,15 @@ $(UBOOT_DIR)/.config:
 
 clean-uboot:
 	$(MAKE) -C $(UBOOT_DIR) distclean
-	@rm -f $(UBOOT_DIR)/*.img
-	@rm -f $(UBOOT_DIR)/*.bin
-	@rm -f $(UBOOT_DIR)/*.mkimage
+	@rm -f $(UBOOT_DIR)/*.img                      \
+	       $(UBOOT_DIR)/*.bin                      \
+	       $(UBOOT_DIR)/*.mkimage                  \
+	       $(MKIMG_DIR)/iMX93/u-boot-spl.bin       \
+	       $(MKIMG_DIR)/iMX93/u-boot.bin           \
+	       $(MKIMG_DIR)/iMX93/u-boot-nodtb.bin     \
+	       $(MKIMG_DIR)/iMX93/u-boot.img           \
+	       $(MKIMG_DIR)/iMX93/imx93-11x11-frdm.dtb \
+	       $(MKIMG_DIR)/iMX93/mkimage-uboot
 
 ################################################################################
 # BL31
@@ -123,7 +134,7 @@ $(UBOOT_DIR)/bl31.bin: $(ATF_DIR)/build/imx93/release/bl31.bin
 $(ATF_DIR)/build/imx93/release/bl31.bin:
 	$(MAKE) -C $(ATF_DIR)                 \
 	        PLAT=imx93                    \
-	        SPD=none                      \
+	        SPD=opteed                    \
 	        BL32_BASE=0xfe000000          \
 	        IMX_BOOT_UART_BASE=0x44380000 \
 	        LOG_LEVEL=40                  \
@@ -131,9 +142,10 @@ $(ATF_DIR)/build/imx93/release/bl31.bin:
 
 clean-atf:
 	$(MAKE) -C $(ATF_DIR) distclean
+	@rm -f $(MKIMG_DIR)/iMX93/bl31.bin
 
 ################################################################################
-# OP-TEE OS
+# BL32
 ################################################################################
 
 $(MKIMG_DIR)/iMX93/tee.bin \
@@ -155,10 +167,13 @@ $(OPTEE_DIR)/out/core/tee-raw.bin:
 	        CFG_TEE_BENCHMARK=n                       \
 	        CFG_TEE_CORE_LOG_LEVEL=3                  \
 	        DEBUG=1                                   \
+	        CFG_IMX_ELE=n                             \
+	        CFG_WITH_SOFTWARE_PRNG=y                  \
 	        O=out
 
 clean-optee:
 	@rm -rf $(OPTEE_DIR)/out
+	@rm -f $(MKIMG_DIR)/iMX93/tee.bin
 
 ################################################################################
 # Universal Update Utility (UUU)
@@ -234,5 +249,5 @@ clean-br:
 .SECONDARY:
 
 .PHONY: build clean clean-uboot clean-atf clean-optee clean-uuu clean-linux \
-        clean-br clean-mkimage
+        clean-br clean-mkimage clean-firmware
 

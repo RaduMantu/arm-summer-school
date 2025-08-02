@@ -73,6 +73,50 @@ $ sudo picocom -b 115200 /dev/ttyACM0
 $ sudo ./mfgtools/build/uuu/uuu -v -b spl out/flash.bin
 ```
 
+For a first time setup, expose one of the two eMMC devices via USB Mass Storage
+to your host. Create a parition table, a parition, then format it and store
+`linux.itb` on it:
+
+```bash
+# (once) expose eMMC 0 via USB controller 0
+u-boot=> ums 0 mmc 0
+
+# (once) format eMMC block device
+$ fdisk /dev/sda
+Command: g          # new GPT partition table
+Command: n          # new partition
+Command: w          # write changes to disk
+
+# (once) format partition and mount it
+$ mkfs.vfat /dev/sda1
+$ mount /dev/sda1 /mnt
+
+# (once) copy uImage Tree on board's eMMC
+$ cp out/linux.itb /mnt
+$ umount .mnt
+u-boot=> Ctrl^C
+
+# (otional) check that file has been written to eMMC
+u-boot=> fatls mmc 0:1
+ 419025723   linux.itb
+
+# load it in memory and boot
+u-boot> fatload mmc 0:1 0x90000000 linux.itb
+419025723 bytes read in 1403 ms (284.8 MiB/s)
+
+# (optional) check that the load addr does not overlap with
+# the ramdisk, kernel or fdt once extracted from the itb
+u-boot=> fdt list /images/kernel load
+load = <0xc0000000>
+u-boot=> fdt list /images/fdt load
+load = <0xc7000000>
+u-boot=> fdt list /images/initrd load
+load = <0xc8000000>
+
+# boot kernel from itb
+u-boot=> bootm 0x90000000
+```
+
 [board]: https://www.nxp.com/design/design-center/development-boards-and-designs/frdm-i-mx-93-development-board:FRDM-IMX93
 [user-manual]: https://www.nxp.com/webapp/Download?colCode=UM12181&isHTMLorPDF=HTML
 [ref-manual]: https://www.nxp.com/webapp/Download?colCode=IMX93RM

@@ -196,7 +196,9 @@ KERN_IMG = $(LINUX_DIR)/arch/arm64/boot/Image
 BR_CPIO  = $(BR_DIR)/output/images/rootfs.cpio
 
 # generates the micro image tree
-$(OUT_DIR)/linux.itb: $(KERN_IMG) $(KERN_DTB) $(BR_CPIO) | $(OUT_DIR)/
+$(OUT_DIR)/linux.itb: $(KERN_IMG) \
+	            .WAIT $(KERN_DTB) \
+	            .WAIT $(BR_CPIO) | $(OUT_DIR)/
 	mkimage -f $(CONF_DIR)/linux.its $@
 
 ################################################################################
@@ -209,6 +211,7 @@ $(KERN_IMG): $(LINUX_DIR)/.config
 
 # needed by mkimage
 $(KERN_DTB): $(LINUX_DIR)/.config
+	@cp $(CONF_DIR)/imx93.dtsi $(LINUX_DIR)/arch/arm64/boot/dts/freescale/imx93.dtsi
 	$(MAKE) -C $(LINUX_DIR) CROSS_COMPILE=aarch64-linux-gnu- ARCH=arm64 freescale/imx93-11x11-evk.dtb
 
 $(LINUX_DIR)/.config:
